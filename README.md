@@ -3,7 +3,7 @@
 실제 체코 은행 공개 데이터(Berka Dataset)를 시각화하는
 WPF 기반 4분할 분석 대시보드입니다.
 
-> **연관 레포**: [BerkaETLPipeline](https://github.com/{your-username}/BerkaETLPipeline) — ETL 파이프라인 + 이상 탐지
+> **연관 레포**: [BerkaETLPipeline](https://github.com/{Yumjiin}/BerkaETLPipeline) — ETL 파이프라인 + 이상 탐지
 
 ---
 
@@ -62,7 +62,7 @@ ClipLabelRepository →  AnomalyRepository
 
 ```bash
 # 1. 레포 클론
-git clone https://github.com/{your-username}/BerkaAnalyticsDashboard.git
+git clone https://github.com/{Yumjiin}/BerkaAnalyticsDashboard.git
 
 # 2. Visual Studio에서 .sln 파일 열기
 
@@ -77,4 +77,4 @@ git clone https://github.com/{your-username}/BerkaAnalyticsDashboard.git
 
 - [프로젝트 설계서](./docs/BerkaAnalytics_설계서.md)
 - [기획서 + IA](./docs/BerkaAnalytics_기획서_IA.md)
-- [Figma 와이어프레임](https://figma.com/{your-figma-link})
+- [Figma 와이어프레임](https://figma.com/{[your-figma-link](https://www.figma.com/design/apK5GQdChjRr2nldRsveic/BerkaAnalytics-%E2%80%94-Wireframe?node-id=0-1&p=f&t=fTBbadj3a5oA2nDS-0)})
