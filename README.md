@@ -3,7 +3,7 @@
 실제 체코 은행 공개 데이터(Berka Dataset)를 시각화하는
 WPF 기반 4분할 분석 대시보드입니다.
 
-> **연관 레포**: [BerkaETLPipeline](https://github.com/{Yumjiin}/BerkaETLPipeline) — ETL 파이프라인 + 이상 탐지
+> **연관 레포**: [BerkaETLPipeline](https://github.com/Yumjiin/BerkaETLPipeline) — ETL 파이프라인 + 이상 탐지
 
 ---
 
