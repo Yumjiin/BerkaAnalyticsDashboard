@@ -1,9 +1,8 @@
 # BerkaAnalyticsDashboard
 
-실제 체코 은행 공개 데이터(Berka Dataset)를 시각화하는
-WPF 기반 4분할 분석 대시보드입니다.
+실제 체코 은행 공개 데이터(Berka Dataset)를 시각화하는 WPF 기반 4분할 분석 대시보드입니다.
 
-> **연관 레포**: [BerkaETLPipeline](https://github.com/Yumjiin/BerkaETLPipeline) — ETL 파이프라인 + 이상 탐지
+> **연관 레포**: [BerkaETLPipeline](https://github.com/Yumjiin/BerkaETLPipeline) — ETL 파이프라인 + 이상 탐지 (Z-Score → Isolation Forest → Autoencoder)
 
 ---
 
@@ -21,6 +20,8 @@ WPF 기반 4분할 분석 대시보드입니다.
 └──────────────────────┴──────────────────────┘
 ```
 
+> 스크린샷은 개발 완료 후 추가 예정입니다.
+
 ---
 
 ## 기술 스택
@@ -37,32 +38,35 @@ WPF 기반 4분할 분석 대시보드입니다.
 
 ## 아키텍처
 
-인턴 프로젝트(EventViewer)와 동일한 5계층 구조를 유지하면서
-데이터 소스를 파일(JSON/WAV) → MySQL DB로 심화했습니다.
+5계층 구조로 관심사를 분리하여 각 레이어의 역할을 명확히 구분했습니다.
 
 ```
-EventViewer (인턴)     BerkaAnalytics (이 프로젝트)
-────────────────────────────────────────────────
-JSON/WAV 파일 읽기  →  MySQL 쿼리
-NoiseLevelFeature   →  SpendingTrendFeature
-MelSpectrogramFeature → BehaviorHeatmapFeature
-ClipLabelRepository →  AnomalyRepository
+Entry Layer        진입점, DI 컨테이너, 앱 초기화
+Feature Layer      패널별 ViewModel, 데이터 바인딩
+Render Layer       ScottPlot / SkiaSharp 렌더링
+Service Layer      쿼리 조합, 비즈니스 로직
+Repository Layer   MySQL 쿼리 실행, 데이터 반환
 ```
+
+데이터 흐름은 `BerkaETLPipeline`에서 정제·적재된 MySQL 데이터를 Repository가 읽어,
+Service → Feature → Render 순으로 전달해 각 패널에 시각화합니다.
 
 ---
 
 ## 실행 방법
 
 ### 사전 요건
+
 - .NET 10 SDK
 - Visual Studio 2022
-- MySQL 8.0 (BerkaETLPipeline 먼저 실행 필요)
+- MySQL 8.0
+- [BerkaETLPipeline](https://github.com/Yumjiin/BerkaETLPipeline) 먼저 실행하여 DB 구축 필요
 
 ### 실행
 
 ```bash
 # 1. 레포 클론
-git clone https://github.com/{Yumjiin}/BerkaAnalyticsDashboard.git
+git clone https://github.com/Yumjiin/BerkaAnalyticsDashboard.git
 
 # 2. Visual Studio에서 .sln 파일 열기
 
