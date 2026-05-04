@@ -77,4 +77,4 @@ git clone https://github.com/{Yumjiin}/BerkaAnalyticsDashboard.git
 
 - [프로젝트 설계서](./docs/BerkaAnalytics_설계서.md)
 - [기획서 + IA](./docs/BerkaAnalytics_기획서_IA.md)
-- [Figma 와이어프레임](https://figma.com/{[your-figma-link](https://www.figma.com/design/apK5GQdChjRr2nldRsveic/BerkaAnalytics-%E2%80%94-Wireframe?node-id=0-1&p=f&t=fTBbadj3a5oA2nDS-0)})
+- [Figma 와이어프레임](https://www.figma.com/design/apK5GQdChjRr2nldRsveic/BerkaAnalytics---Wireframe?node-id=0-1&t=RIcuQDwEJz1s34k1-1)
