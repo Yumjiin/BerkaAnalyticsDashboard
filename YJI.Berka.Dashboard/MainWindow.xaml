@@ -1,12 +1,270 @@
 ﻿<Window x:Class="YJI.Berka.Dashboard.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:YJI.Berka.Dashboard"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="BerkaAnalytics"
+        Height="900" Width="1400"
+        MinHeight="700" MinWidth="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56"/>
+            <!-- 툴바 -->
+            <RowDefinition Height="*"/>
+            <!-- 메인 영역 -->
+            <RowDefinition Height="36"/>
+            <!-- 상태바 -->
+        </Grid.RowDefinitions>
+
+        <!-- ── 툴바 ── -->
+        <Border Grid.Row="0" Background="White"
+                BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Grid Margin="16,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="32" Height="32" CornerRadius="6"
+                            Background="#111" Margin="0,0,10,0"/>
+                    <TextBlock Text="BerkaAnalytics"
+                               FontSize="16" FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <Button x:Name="BtnDetect"
+                            Content="탐지 실행"
+                            Height="32" Padding="16,0"
+                            Background="#111" Foreground="White"
+                            BorderThickness="0" FontSize="13"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ── 메인 영역 ── -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240"/>
+                <!-- 사이드바 -->
+                <ColumnDefinition Width="*"/>
+                <!-- 콘텐츠 -->
+            </Grid.ColumnDefinitions>
+
+            <!-- 사이드바 -->
+            <Border Grid.Column="0" Background="White"
+                    BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 계좌 목록 헤더 -->
+                    <Grid Grid.Row="0" Margin="16,16,16,8">
+                        <TextBlock Text="계좌 목록"
+                                   FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtAccountCount"
+                                   Text="45개"
+                                   FontSize="12" Foreground="#888"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- 검색창 -->
+                    <Border Grid.Row="1" Margin="16,0,16,8"
+                            BorderBrush="#E0E0E0" BorderThickness="1"
+                            CornerRadius="4" Background="#F9F9F9">
+                        <TextBox x:Name="TxtSearch"
+                                 Text="계좌 검색..."
+                                 Foreground="#AAA"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="8,6"
+                                 FontSize="12"
+                                 GotFocus="TxtSearch_GotFocus"
+                                 LostFocus="TxtSearch_LostFocus"/>
+                    </Border>
+
+                    <!-- 계좌 목록 -->
+                    <ListView x:Name="LstAccounts"
+                              Grid.Row="2"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              SelectionMode="Single"/>
+                </Grid>
+            </Border>
+
+            <!-- 콘텐츠 영역 -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="48"/>
+                    <!-- 기간 필터 -->
+                    <RowDefinition Height="*"/>
+                    <!-- 4분할 패널 -->
+                </Grid.RowDefinitions>
+
+                <!-- 기간 필터 -->
+                <Border Grid.Row="0" Background="White"
+                        BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="16,0">
+                        <TextBlock Text="기간" FontSize="13" Foreground="#555"
+                                   VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4">
+                            <TextBox x:Name="TxtStartDate" Text="1993-01-01"
+                                     Width="100" Padding="8,4"
+                                     BorderThickness="0" FontSize="12"/>
+                        </Border>
+                        <TextBlock Text="~" Margin="8,0" VerticalAlignment="Center" Foreground="#888"/>
+                        <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4">
+                            <TextBox x:Name="TxtEndDate" Text="1998-12-31"
+                                     Width="100" Padding="8,4"
+                                     BorderThickness="0" FontSize="12"/>
+                        </Border>
+                        <Button x:Name="BtnApply"
+                                Content="적용"
+                                Height="28" Padding="16,0"
+                                Margin="12,0,0,0"
+                                Background="White"
+                                BorderBrush="#DDD" BorderThickness="1"
+                                FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4분할 패널 -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Panel 1 — 일별 지출 추이 -->
+                    <Border Grid.Column="0" Grid.Row="0"
+                            Background="White" Margin="8,8,4,4"
+                            BorderBrush="#E0E0E0" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Margin="16,12,16,0">
+                                <TextBlock Text="일별 지출 추이" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="ScottPlot 라인 그래프" FontSize="11" Foreground="#888"/>
+                            </StackPanel>
+                            <Border Grid.Row="1" Margin="16,8,16,8"
+                                    Background="#F9F9F9" BorderBrush="#EEE" BorderThickness="1"
+                                    x:Name="Panel1Host"/>
+                            <TextBlock Grid.Row="2" Margin="16,0,16,12"
+                                       Text="라인 그래프 · 날짜 × 금액(CZK)"
+                                       FontSize="11" Foreground="#AAA"
+                                       HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Panel 2 — 시간×요일 히트맵 -->
+                    <Border Grid.Column="1" Grid.Row="0"
+                            Background="White" Margin="4,8,8,4"
+                            BorderBrush="#E0E0E0" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Margin="16,12,16,0">
+                                <TextBlock Text="시간 × 요일 히트맵" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="SkiaSharp 히트맵" FontSize="11" Foreground="#888"/>
+                            </StackPanel>
+                            <Border Grid.Row="1" Margin="16,8,16,8"
+                                    Background="#F9F9F9" BorderBrush="#EEE" BorderThickness="1"
+                                    x:Name="Panel2Host"/>
+                            <TextBlock Grid.Row="2" Margin="16,0,16,12"
+                                       Text="히트맵 · 24시간 × 요일"
+                                       FontSize="11" Foreground="#AAA"
+                                       HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Panel 3 — 업종별 지출 분포 -->
+                    <Border Grid.Column="0" Grid.Row="1"
+                            Background="White" Margin="8,4,4,8"
+                            BorderBrush="#E0E0E0" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Margin="16,12,16,0">
+                                <TextBlock Text="업종별 지출 분포" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="ScottPlot 가로 막대" FontSize="11" Foreground="#888"/>
+                            </StackPanel>
+                            <Border Grid.Row="1" Margin="16,8,16,8"
+                                    Background="#F9F9F9" BorderBrush="#EEE" BorderThickness="1"
+                                    x:Name="Panel3Host"/>
+                            <TextBlock Grid.Row="2" Margin="16,0,16,12"
+                                       Text="가로 막대 · 업종 × 금액"
+                                       FontSize="11" Foreground="#AAA"
+                                       HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Panel 4 — 월별 지출 비교 -->
+                    <Border Grid.Column="1" Grid.Row="1"
+                            Background="White" Margin="4,4,8,8"
+                            BorderBrush="#E0E0E0" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Margin="16,12,16,0">
+                                <TextBlock Text="월별 지출 비교" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="ScottPlot 세로 막대" FontSize="11" Foreground="#888"/>
+                            </StackPanel>
+                            <Border Grid.Row="1" Margin="16,8,16,8"
+                                    Background="#F9F9F9" BorderBrush="#EEE" BorderThickness="1"
+                                    x:Name="Panel4Host"/>
+                            <TextBlock Grid.Row="2" Margin="16,0,16,12"
+                                       Text="세로 막대 · 월 × 총지출(CZK)"
+                                       FontSize="11" Foreground="#AAA"
+                                       HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ── 하단 상태바 ── -->
+        <Border Grid.Row="2" Background="White"
+                BorderBrush="#E0E0E0" BorderThickness="0,1,0,0">
+            <Grid Margin="16,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Fill="#4CAF50" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="TxtDbStatus"
+                               Text="DB: 연결됨"
+                               FontSize="11" Foreground="#555" Margin="0,0,16,0"/>
+                    <TextBlock x:Name="TxtCurrentAccount"
+                               Text="계좌: -"
+                               FontSize="11" Foreground="#555" Margin="0,0,16,0"/>
+                    <TextBlock x:Name="TxtDataCount"
+                               Text="데이터: -"
+                               FontSize="11" Foreground="#555"/>
+                </StackPanel>
+                <TextBlock x:Name="TxtLastRefresh"
+                           Text="마지막 갱신: -"
+                           FontSize="11" Foreground="#AAA"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
