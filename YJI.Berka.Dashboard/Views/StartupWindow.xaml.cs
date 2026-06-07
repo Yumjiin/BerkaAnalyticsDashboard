@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Media;
 using MySql.Data.MySqlClient;
 
 namespace YJI.Berka.Dashboard.Views
@@ -42,9 +41,18 @@ namespace YJI.Berka.Dashboard.Views
 
         private void OnStart(object sender, RoutedEventArgs e)
         {
-            var main = new MainWindow(ConnectionString!);
+            // 현재 창 크기와 위치를 MainWindow에 그대로 전달
+            var main = new MainWindow(ConnectionString!)
+            {
+                Width = this.Width,
+                Height = this.Height,
+                Left = this.Left,
+                Top = this.Top,
+                WindowState = this.WindowState
+            };
+
             main.Show();
-            Close();
+            this.Close();
         }
 
         private string BuildConnectionString()
@@ -54,11 +62,6 @@ namespace YJI.Berka.Dashboard.Views
                    $"Database={TxtDatabase.Text};" +
                    $"Uid={TxtUsername.Text};" +
                    $"Pwd={PwdPassword.Password};";
-        }
-
-        private void TxtPort_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-
         }
     }
 }
