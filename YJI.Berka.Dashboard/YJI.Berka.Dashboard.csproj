@@ -8,4 +8,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YJI.Berka.Data\YJI.Berka.Data.csproj" />
+  </ItemGroup>
+
 </Project>
