@@ -91,7 +91,49 @@
                               Grid.Row="2"
                               BorderThickness="0"
                               Background="Transparent"
-                              SelectionMode="Single"/>
+                              SelectionMode="Single"
+                              SelectionChanged="LstAccounts_SelectionChanged">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="16,10" BorderBrush="#F0F0F0" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontSize="13" FontWeight="SemiBold"/>
+                                            <Border Margin="8,0,0,0" Padding="6,2"
+                                                    Background="#FFF3F3" CornerRadius="3"
+                                                    Visibility="{Binding AnomalyBadgeVisibility}">
+                                                <TextBlock Text="탐지됨" FontSize="10" Foreground="#E53935"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Grid.Row="1"
+                                                   FontSize="11" Foreground="#888"
+                                                   Margin="0,2,0,0">
+                                            <Run Text="{Binding DaysLabel}"/>
+                                            <Run Text=" · "/>
+                                            <Run Text="{Binding PeriodLabel}"/>
+                                        </TextBlock>
+                                        <TextBlock Grid.Row="2"
+                                                   FontSize="10" Foreground="#AAA"
+                                                   Margin="0,2,0,0"
+                                                   Text="{Binding AnomalyLabel}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </Grid>
             </Border>
 
