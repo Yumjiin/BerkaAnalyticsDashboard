@@ -77,14 +77,15 @@
                             BorderBrush="#E0E0E0" BorderThickness="1"
                             CornerRadius="4" Background="#F9F9F9">
                         <TextBox x:Name="TxtSearch"
-                                 Text="계좌 검색..."
-                                 Foreground="#AAA"
-                                 BorderThickness="0"
-                                 Background="Transparent"
-                                 Padding="8,6"
-                                 FontSize="12"
-                                 GotFocus="TxtSearch_GotFocus"
-                                 LostFocus="TxtSearch_LostFocus"/>
+                                Text="계좌 검색..."
+                                Foreground="#AAA"
+                                BorderThickness="0"
+                                Background="Transparent"
+                                Padding="8,6"
+                                FontSize="12"
+                                GotFocus="TxtSearch_GotFocus"
+                                LostFocus="TxtSearch_LostFocus"
+                                TextChanged="TxtSearch_TextChanged"/>
                     </Border>
 
                     <!-- 계좌 목록 -->

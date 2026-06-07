@@ -170,4 +170,31 @@ public partial class MainWindow : Window
                 Color.FromRgb(0xAA, 0xAA, 0xAA));
         }
     }
+
+    private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (LstAccounts == null || _accounts == null || _accounts.Count == 0)
+            return;
+
+        // placeholder 텍스트이면 전체 목록 표시
+        if (TxtSearch.Text == "계좌 검색...")
+        {
+            LstAccounts.ItemsSource = _accounts;
+            return;
+        }
+
+        // 빈 문자열이면 전체 목록 표시
+        if (string.IsNullOrWhiteSpace(TxtSearch.Text))
+        {
+            LstAccounts.ItemsSource = _accounts;
+            return;
+        }
+
+        // AccountId로 필터링
+        var filtered = _accounts
+            .Where(a => a.AccountId.ToString().Contains(TxtSearch.Text.Trim()))
+            .ToList();
+
+        LstAccounts.ItemsSource = filtered;
+    }
 }
