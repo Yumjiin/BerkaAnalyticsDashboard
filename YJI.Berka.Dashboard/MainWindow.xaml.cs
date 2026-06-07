@@ -16,8 +16,15 @@ namespace YJI.Berka.Dashboard;
 /// </summary>
 public partial class MainWindow : Window
 {
+    public string ConnectionString { get; }
+
     public MainWindow()
     {
         InitializeComponent();
+    }
+
+    public MainWindow(string connectionString) : this()
+    {
+        ConnectionString = connectionString;
     }
 }
