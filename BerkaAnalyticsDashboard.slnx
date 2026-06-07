@@ -1,1 +1,4 @@
-<Solution />
+<Solution>
+  <Project Path="YJI.Berka.Dashboard/YJI.Berka.Dashboard.csproj" />
+  <Project Path="YJI.Berka.Data/YJI.Berka.Data.csproj" />
+</Solution>
