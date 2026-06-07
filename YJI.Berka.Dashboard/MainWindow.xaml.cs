@@ -1,12 +1,21 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.Extensions.Configuration;
+using YJI.Berka.Data.Connection;
+using YJI.Berka.Data.DTOs;
+using YJI.Berka.Data.Features;
+using YJI.Berka.Data.Repositories;
 
 namespace YJI.Berka.Dashboard;
 
 public partial class MainWindow : Window
 {
     public string ConnectionString { get; }
+
+    private IConnectionFactory? _connectionFactory;
+    private AccountSummaryFeature? _accountSummaryFeature;
+    private List<AccountSummaryDto> _accounts = new();
 
     public MainWindow()
     {
@@ -21,12 +30,53 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // 하단 상태바 업데이트
+        // 상태바 초기화
         TxtDbStatus.Text = "DB: 연결됨";
         TxtLastRefresh.Text = $"마지막 갱신: {DateTime.Now:HH:mm:ss}";
-
-        // TODO: 계좌 목록 로드 (Repository 연동 후 구현)
         TxtAccountCount.Text = "로딩 중...";
+
+        // ConnectionFactory 생성
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:BerkaDb"] = ConnectionString
+            })
+            .Build();
+
+        _connectionFactory = new ConnectionFactory(config);
+
+        // Feature 생성
+        var accountRepo = new AccountRepository(_connectionFactory);
+        _accountSummaryFeature = new AccountSummaryFeature(accountRepo, _connectionFactory);
+
+        // 계좌 목록 로드
+        await LoadAccountsAsync();
+    }
+
+    private async Task LoadAccountsAsync()
+    {
+        try
+        {
+            var accounts = await _accountSummaryFeature!.LoadAsync();
+            _accounts = accounts.ToList();
+
+            // ListView 바인딩
+            LstAccounts.ItemsSource = _accounts;
+            TxtAccountCount.Text = $"{_accounts.Count}개";
+            TxtLastRefresh.Text = $"마지막 갱신: {DateTime.Now:HH:mm:ss}";
+        }
+        catch (Exception ex)
+        {
+            TxtDbStatus.Text = $"DB: 오류 — {ex.Message}";
+        }
+    }
+
+    private void LstAccounts_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (LstAccounts.SelectedItem is not AccountSummaryDto selected) return;
+
+        TxtCurrentAccount.Text = $"계좌: Account {selected.AccountId}";
+        // TODO: 4개 패널 갱신
     }
 
     // 검색창 Placeholder 처리
