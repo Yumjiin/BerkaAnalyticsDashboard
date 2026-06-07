@@ -6,6 +6,7 @@ using YJI.Berka.Data.Connection;
 using YJI.Berka.Data.DTOs;
 using YJI.Berka.Data.Features;
 using YJI.Berka.Data.Repositories;
+using YJI.Berka.Dashboard.Renderers;
 
 namespace YJI.Berka.Dashboard;
 
@@ -13,8 +14,22 @@ public partial class MainWindow : Window
 {
     public string ConnectionString { get; }
 
+    // DB 연결
     private IConnectionFactory? _connectionFactory;
+
+    // Features
     private AccountSummaryFeature? _accountSummaryFeature;
+    private SpendingTrendFeature? _spendingTrendFeature;
+    private CategoryFeature? _categoryFeature;
+    private MonthlySpendingFeature? _monthlySpendingFeature;
+
+    // Renderers
+    private readonly SpendingTrendRender _spendingRender = new();
+    private readonly AnomalyComparisonRender _anomalyRender = new();
+    private readonly CategoryRender _categoryRender = new();
+    private readonly MonthlySpendingRender _monthlyRender = new();
+
+    // 계좌 목록
     private List<AccountSummaryDto> _accounts = new();
 
     public MainWindow()
@@ -30,7 +45,6 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // 상태바 초기화
         TxtDbStatus.Text = "DB: 연결됨";
         TxtLastRefresh.Text = $"마지막 갱신: {DateTime.Now:HH:mm:ss}";
         TxtAccountCount.Text = "로딩 중...";
@@ -47,9 +61,13 @@ public partial class MainWindow : Window
 
         // Feature 생성
         var accountRepo = new AccountRepository(_connectionFactory);
-        _accountSummaryFeature = new AccountSummaryFeature(accountRepo, _connectionFactory);
+        var anomalyRepo = new AnomalyRepository(_connectionFactory);
 
-        // 계좌 목록 로드
+        _accountSummaryFeature = new AccountSummaryFeature(accountRepo, _connectionFactory);
+        _spendingTrendFeature = new SpendingTrendFeature(accountRepo, anomalyRepo);
+        _categoryFeature = new CategoryFeature(accountRepo, anomalyRepo);
+        _monthlySpendingFeature = new MonthlySpendingFeature(_connectionFactory);
+
         await LoadAccountsAsync();
     }
 
@@ -60,7 +78,6 @@ public partial class MainWindow : Window
             var accounts = await _accountSummaryFeature!.LoadAsync();
             _accounts = accounts.ToList();
 
-            // ListView 바인딩
             LstAccounts.ItemsSource = _accounts;
             TxtAccountCount.Text = $"{_accounts.Count}개";
             TxtLastRefresh.Text = $"마지막 갱신: {DateTime.Now:HH:mm:ss}";
@@ -71,12 +88,67 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LstAccounts_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void LstAccounts_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (LstAccounts.SelectedItem is not AccountSummaryDto selected) return;
 
         TxtCurrentAccount.Text = $"계좌: Account {selected.AccountId}";
-        // TODO: 4개 패널 갱신
+
+        var start = DpStartDate.SelectedDate ?? new DateTime(1993, 1, 1);
+        var end = DpEndDate.SelectedDate ?? new DateTime(1998, 12, 31);
+
+        await RenderAllPanelsAsync(selected, start, end);
+    }
+
+    private async Task RenderAllPanelsAsync(
+        AccountSummaryDto selected, DateTime start, DateTime end)
+    {
+        try
+        {
+            // Panel 1 — 일별 지출 추이
+            var spendingData = await _spendingTrendFeature!
+                .LoadAsync(selected.AccountId, start, end);
+            _spendingRender.Render(Plot1SpendingTrend, spendingData);
+
+            // Panel 2 — 모델별 이상 탐지 비교 (DB 쿼리 없이 DTO 직접 생성)
+            var anomalyDto = new AnomalyComparisonDto
+            {
+                ZscoreCount = selected.ZscoreAnomalyCount,
+                IforestCount = selected.IforestAnomalyCount,
+                AeCount = selected.AeAnomalyCount,
+                HighConfidenceCount = selected.HighConfidenceCount
+            };
+            _anomalyRender.Render(Plot2Heatmap, anomalyDto);
+
+            // Panel 3 — 업종별 지출 분포
+            var categoryData = await _categoryFeature!
+                .LoadAsync(selected.AccountId);
+            _categoryRender.Render(Plot3Category, categoryData);
+
+            // Panel 4 — 월별 지출 비교
+            var monthlyData = await _monthlySpendingFeature!
+                .LoadAsync(selected.AccountId, start, end);
+            _monthlyRender.Render(Plot4Monthly, monthlyData);
+
+            // 상태바 갱신
+            TxtDataCount.Text = $"데이터: {spendingData.Count()}일";
+            TxtLastRefresh.Text = $"마지막 갱신: {DateTime.Now:HH:mm:ss}";
+        }
+        catch (Exception ex)
+        {
+            TxtDbStatus.Text = $"오류 — {ex.Message}";
+        }
+    }
+
+    // 기간 필터 적용 버튼
+    private async void BtnApply_Click(object sender, RoutedEventArgs e)
+    {
+        if (LstAccounts.SelectedItem is not AccountSummaryDto selected) return;
+
+        var start = DpStartDate.SelectedDate ?? new DateTime(1993, 1, 1);
+        var end = DpEndDate.SelectedDate ?? new DateTime(1998, 12, 31);
+
+        await RenderAllPanelsAsync(selected, start, end);
     }
 
     // 검색창 Placeholder 처리
@@ -94,7 +166,8 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(TxtSearch.Text))
         {
             TxtSearch.Text = "계좌 검색...";
-            TxtSearch.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+            TxtSearch.Foreground = new SolidColorBrush(
+                Color.FromRgb(0xAA, 0xAA, 0xAA));
         }
     }
 }
