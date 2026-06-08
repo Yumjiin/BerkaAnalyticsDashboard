@@ -1,0 +1,178 @@
+﻿<Window x:Class="YJI.Berka.Dashboard.Views.AnomalyResultWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="S-03 이상 탐지 결과"
+        Height="700" Width="1100"
+        MinHeight="500" MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="72"/>
+            <!-- 헤더 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 모델 카드 -->
+            <RowDefinition Height="*"/>
+            <!-- 고신뢰 테이블 -->
+            <RowDefinition Height="32"/>
+            <!-- 상태바 -->
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 -->
+        <Border Grid.Row="0" Background="White"
+                BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Grid Margin="24,0">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="이상 탐지 결과"
+                               FontSize="18" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="TxtSubtitle"
+                               Text="계좌 선택 대기 중"
+                               FontSize="12" Foreground="#888"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+                <Button Content="X 닫기"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Height="32" Padding="16,0"
+                        Background="White"
+                        BorderBrush="#DDD" BorderThickness="1"
+                        FontSize="12"
+                        Click="OnClose"/>
+            </Grid>
+        </Border>
+
+        <!-- 3개 모델 카드 -->
+        <Grid Grid.Row="1" Margin="24,20,24,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Z-Score 카드 -->
+            <Border Grid.Column="0" Background="White"
+                    BorderBrush="#E0E0E0" BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Z-Score" FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock Text="통계 기반" FontSize="11" Foreground="#888" Margin="0,4,0,0"/>
+                    <Separator Margin="0,12,0,12" Background="#EEE"/>
+                    <TextBlock x:Name="TxtZscoreCount"
+                               Text="-"
+                               FontSize="28" FontWeight="Bold"/>
+                    <TextBlock Text="임계값: z = 2.5" FontSize="11" Foreground="#888" Margin="0,6,0,0"/>
+                    <TextBlock Text="단일 변수(금액) 극단치 탐지"
+                               FontSize="11" Foreground="#888" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Isolation Forest 카드 -->
+            <Border Grid.Column="2" Background="White"
+                    BorderBrush="#E0E0E0" BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Isolation Forest" FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock Text="ML 기반" FontSize="11" Foreground="#888" Margin="0,4,0,0"/>
+                    <Separator Margin="0,12,0,12" Background="#EEE"/>
+                    <TextBlock x:Name="TxtIforestCount"
+                               Text="-"
+                               FontSize="28" FontWeight="Bold"/>
+                    <TextBlock Text="오염도: 5%" FontSize="11" Foreground="#888" Margin="0,6,0,0"/>
+                    <TextBlock Text="다변수 공간 내 고립도 측정"
+                               FontSize="11" Foreground="#888" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Autoencoder 카드 -->
+            <Border Grid.Column="4" Background="White"
+                    BorderBrush="#E0E0E0" BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Autoencoder" FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock Text="딥러닝 기반" FontSize="11" Foreground="#888" Margin="0,4,0,0"/>
+                    <Separator Margin="0,12,0,12" Background="#EEE"/>
+                    <TextBlock x:Name="TxtAeCount"
+                               Text="-"
+                               FontSize="28" FontWeight="Bold"/>
+                    <TextBlock Text="오차 임계: 자동 산출" FontSize="11" Foreground="#888" Margin="0,6,0,0"/>
+                    <TextBlock Text="정상 패턴 학습 후 재구성 오차"
+                               FontSize="11" Foreground="#888" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 고신뢰 이상 거래 테이블 -->
+        <Border Grid.Row="2" Margin="24,20,24,0"
+                Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 테이블 헤더 -->
+                <Border Grid.Row="0" Padding="20,14"
+                        BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                    <TextBlock x:Name="TxtTableTitle"
+                               Text="고신뢰 이상 거래 (2개 이상 모델 공통 탐지)"
+                               FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="1"
+                          x:Name="DgAnomalies"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          BorderThickness="0"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          AlternatingRowBackground="#FAFAFA"
+                          RowBackground="White"
+                          FontSize="12">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="날짜"
+                                            Binding="{Binding DateLabel}"
+                                            Width="120"/>
+                        <DataGridTextColumn Header="금액 (CZK)"
+                                            Binding="{Binding AmountLabel}"
+                                            Width="120"/>
+                        <DataGridTextColumn Header="Z-Score"
+                                            Binding="{Binding ZscoreLabel}"
+                                            Width="100"/>
+                        <DataGridTextColumn Header="IForest Score"
+                                            Binding="{Binding IforestLabel}"
+                                            Width="120"/>
+                        <DataGridTextColumn Header="AE 오차"
+                                            Binding="{Binding AeLabel}"
+                                            Width="120"/>
+                        <DataGridTextColumn Header="탐지 모델"
+                                            Binding="{Binding DetectedBy}"
+                                            Width="*"/>
+                        <DataGridTextColumn Header="신뢰도"
+                                            Binding="{Binding ConfidenceLabel}"
+                                            Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- 상태바 -->
+        <Border Grid.Row="3" Background="White"
+                BorderBrush="#E0E0E0" BorderThickness="0,1,0,0">
+            <Grid Margin="24,0">
+                <TextBlock x:Name="TxtStatus"
+                           Text="DB: 연결됨"
+                           FontSize="11" Foreground="#888"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtLastRefresh"
+                           Text="-"
+                           FontSize="11" Foreground="#888"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

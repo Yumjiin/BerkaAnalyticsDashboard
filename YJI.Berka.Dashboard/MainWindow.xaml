@@ -33,10 +33,19 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center">
                     <Button x:Name="BtnDetect"
-                            Content="탐지 실행"
+                            Content="이상 탐지 결과 보기"
                             Height="32" Padding="16,0"
                             Background="#111" Foreground="White"
-                            BorderThickness="0" FontSize="13"/>
+                            BorderThickness="0" FontSize="13"
+                            IsEnabled="False"
+                            Click="BtnDetect_Click"/>
+                    <Button x:Name="BtnSettings"
+                            Content="설정"
+                            Height="32" Padding="16,0"
+                            Background="White"
+                            BorderBrush="#DDD" BorderThickness="1"
+                            FontSize="13"
+                            Click="BtnSettings_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

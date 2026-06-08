@@ -1,12 +1,13 @@
-﻿using System.Windows;
+﻿using Microsoft.Extensions.Configuration;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Microsoft.Extensions.Configuration;
+using YJI.Berka.Dashboard.Renderers;
+using YJI.Berka.Dashboard.Views;
 using YJI.Berka.Data.Connection;
 using YJI.Berka.Data.DTOs;
 using YJI.Berka.Data.Features;
 using YJI.Berka.Data.Repositories;
-using YJI.Berka.Dashboard.Renderers;
 
 namespace YJI.Berka.Dashboard;
 
@@ -93,6 +94,7 @@ public partial class MainWindow : Window
         if (LstAccounts.SelectedItem is not AccountSummaryDto selected) return;
 
         TxtCurrentAccount.Text = $"계좌: Account {selected.AccountId}";
+        BtnDetect.IsEnabled = true;
 
         var start = DpStartDate.SelectedDate ?? new DateTime(1993, 1, 1);
         var end = DpEndDate.SelectedDate ?? new DateTime(1998, 12, 31);
@@ -196,5 +198,21 @@ public partial class MainWindow : Window
             .ToList();
 
         LstAccounts.ItemsSource = filtered;
+    }
+    private void BtnDetect_Click(object sender, RoutedEventArgs e)
+    {
+        if (LstAccounts.SelectedItem is not AccountSummaryDto selected) return;
+
+        var start = DpStartDate.SelectedDate ?? new DateTime(1993, 1, 1);
+        var end = DpEndDate.SelectedDate ?? new DateTime(1998, 12, 31);
+
+        var window = new AnomalyResultWindow(
+            ConnectionString, selected.AccountId, start, end);
+        window.Show();
+    }
+    private void BtnSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var settings = new SettingsWindow(ConnectionString);
+        settings.Show();
     }
 }
