@@ -2,27 +2,47 @@
 
 ![C#](https://img.shields.io/badge/C%23-.NET_10-512BD4?logo=dotnet&logoColor=white)
 ![WPF](https://img.shields.io/badge/UI-WPF%2FXAML-512BD4)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
-![ScottPlot](https://img.shields.io/badge/Chart-ScottPlot-blue)
-![SkiaSharp](https://img.shields.io/badge/Render-SkiaSharp-pink)
 
-실제 체코 은행 공개 데이터(Berka Dataset)를 시각화하는 WPF 기반 4분할 분석 대시보드입니다.
+실제 체코 은행 공개 데이터(Berka Dataset)의 ETL + 이상탐지 결과를 시각화하는 C# WPF 기반 분석 대시보드입니다.
 
 > **연관 레포**: [BerkaETLPipeline](https://github.com/Yumjiin/BerkaETLPipeline)
-> — ETL 파이프라인 + 이상 탐지 (Z-Score → Isolation Forest → Autoencoder)
+> — ETL 파이프라인 + 3가지 독립적인 이상 탐지 모델 (Z-Score · Isolation Forest · Autoencoder)
+
+---
+
+## 스크린샷
+
+### DB 연결 화면 (S-01)
+<!-- 스크린샷 추가 예정 -->
+
+### 메인 대시보드 (S-02)
+<!-- 스크린샷 추가 예정 -->
+
+### 이상 탐지 결과 (S-03)
+<!-- 스크린샷 추가 예정 -->
+
+### 설정 화면 (S-04)
+<!-- 스크린샷 추가 예정 -->
 
 ---
 
 ## 화면 구성
 
-| 패널 1 — 일별 지출 추이 | 패널 2 — 시간×요일 히트맵 |
-|------------------------|--------------------------|
-| ScottPlot 라인 차트     | SkiaSharp 히트맵          |
-| **패널 3** — 업종별 지출 분포 | **패널 4** — 월별 지출 비교 |
-| ScottPlot 막대 차트     | ScottPlot 막대 차트       |
+| 화면 | 설명 |
+|------|------|
+| S-01 DB 연결 | MySQL 연결 정보 입력 및 연결 확인 |
+| S-02 메인 대시보드 | 계좌 선택 + 기간 필터 + 4분할 차트 패널 |
+| S-03 이상 탐지 결과 | 3개 모델 탐지 건수 카드 + 고신뢰 이상 거래 상세 테이블 |
+| S-04 설정 | DB 연결 정보 확인 + 이상 탐지 임계값 참고 + 연결 끊기 |
 
-> 스크린샷은 개발 완료 후 추가 예정입니다.  
-> [Figma 와이어프레임](https://www.figma.com/design/apK5GQdChjRr2nldRsveic/BerkaAnalytics---Wireframe?node-id=0-1&t=RIcuQDwEJz1s34k1-1)에서 UI 구성을 미리 확인하실 수 있습니다.
+### 4분할 패널
+
+| 패널 | 차트 유형 | 설명 |
+|------|-----------|------|
+| Panel 1 - 일별 지출 추이 | ScottPlot 라인 | 일별 지출액 + 이상 탐지 날짜 수직선 |
+| Panel 2 - 모델별 이상 탐지 비교 | ScottPlot 가로 막대 | Z-Score / IForest / AE / 고신뢰 건수 비교 |
+| Panel 3 - 업종별 지출 분포 | ScottPlot 가로 막대 | 업종(k_symbol)별 총 지출액 |
+| Panel 4 - 월별 지출 비교 | ScottPlot 세로 막대 | 월별 총지출 + 전월 대비 증감 색상 구분 |
 
 ---
 
@@ -31,35 +51,56 @@
 | 분류 | 기술 |
 |------|------|
 | 언어 | C# / .NET 10 |
-| UI | WPF / XAML / MVVM |
-| 그래프 | ScottPlot, SkiaSharp |
+| UI | WPF / XAML |
+| 아키텍처 | MVVM (DashboardViewModel) |
+| 차트 | ScottPlot 5 |
 | DB 연동 | MySql.Data, Dapper |
-| 아키텍처 | 5계층 (Entry → Feature → Render → Service → Repository) |
+| 설정 | Microsoft.Extensions.Configuration |
 
 ---
 
 ## 아키텍처
 
-5계층 구조로 관심사를 분리하여 각 레이어의 역할을 명확히 구분했습니다.
+5계층 구조로 관심사를 분리했습니다.
 
 ```
-MySQL (BerkaETLPipeline에서 적재)
+Docker MySQL (BerkaETLPipeline에서 적재)
     ↓
-Repository Layer   MySQL 쿼리 실행, 데이터 반환
+Repository Layer   Dapper로 MySQL 쿼리 실행
     ↓
-Service Layer      쿼리 조합, 비즈니스 로직
+Feature Layer      Entity → DTO 변환 및 가공
     ↓
-Feature Layer      패널별 ViewModel, 데이터 바인딩
+Renderer Layer     ScottPlot 차트 렌더링
     ↓
-Render Layer       ScottPlot / SkiaSharp 렌더링
-    ↓
-Entry Layer        진입점, DI 컨테이너, 앱 초기화
-                   ↕
-                WPF View (4분할 대시보드 출력)
+View Layer         4분할 대시보드 + S-03 + S-04
+    ↕
+ViewModel Layer    계좌 목록 / 선택 상태 / 기간 필터 관리
 ```
 
-`BerkaETLPipeline`에서 정제·적재된 MySQL 데이터를 Repository가 읽어,  
-Service → Feature → Render 순으로 전달해 각 패널에 시각화합니다.
+### 프로젝트 구조
+
+```
+BerkaAnalyticsDashboard/
+├── YJI.Berka.Data/                  데이터 레이어
+│   ├── Connection/                  DB 연결 팩토리
+│   ├── Entities/                    MySQL 테이블 매핑
+│   ├── Repositories/                Dapper 쿼리
+│   ├── DTOs/                        화면 전달용 가공 데이터
+│   └── Features/                    Entity → DTO 변환
+└── YJI.Berka.Dashboard/             UI 레이어
+    ├── Renderers/                   ScottPlot 차트 렌더러
+    │   ├── SpendingTrendRender.cs
+    │   ├── AnomalyComparisonRender.cs
+    │   ├── CategoryRender.cs
+    │   └── MonthlySpendingRender.cs
+    ├── ViewModels/
+    │   └── DashboardViewModel.cs    계좌/기간 상태 관리
+    └── Views/
+        ├── StartupWindow.xaml       S-01 DB 연결
+        ├── MainWindow.xaml          S-02 메인 대시보드
+        ├── AnomalyResultWindow.xaml S-03 이상 탐지 결과
+        └── SettingsWindow.xaml      S-04 설정
+```
 
 ---
 
@@ -68,36 +109,38 @@ Service → Feature → Render 순으로 전달해 각 패널에 시각화합니
 ### 사전 요건
 
 - .NET 10 SDK
-- Visual Studio 2022
-- MySQL 8.0
+- Visual Studio 2022 이상
+- Docker Desktop
 - [BerkaETLPipeline](https://github.com/Yumjiin/BerkaETLPipeline) 먼저 실행하여 DB 구축 필요
 
-### 실행
+### 1. ETL 파이프라인 실행 (BerkaETLPipeline)
 
 ```bash
-# 1. 레포 클론
+docker compose run --rm etl        # ETL 실행
+docker compose run --rm detection  # 이상 탐지 실행
+```
+
+### 2. 대시보드 실행
+
+```bash
 git clone https://github.com/Yumjiin/BerkaAnalyticsDashboard.git
-
-# 2. Visual Studio에서 .sln 파일 열기
-
-# 3. appsettings.json에 DB 연결 정보 입력 (아래 DB 연결 설정 참고)
-
-# 4. F5 실행
 ```
 
----
+Visual Studio에서 `BerkaAnalyticsDashboard.slnx` 열기 후 `F5` 실행
 
-## DB 연결 설정
+### 3. DB 연결
 
-`appsettings.json`에 MySQL 연결 정보를 입력하세요.
+실행 후 S-01 화면에서 DB 연결 정보를 입력합니다.
 
-```json
-{
-  "ConnectionStrings": {
-    "BerkaDb": "Server=localhost;Port=3306;Database=berka;Uid=berka_user;Pwd=your_password;"
-  }
-}
-```
+| 항목 | 기본값 |
+|------|--------|
+| Host | 127.0.0.1 |
+| Port | 3306 |
+| Database | berka |
+| Username | berka_user |
+| Password | berka1234 |
+
+> Docker Desktop이 실행 중이어야 MySQL 컨테이너에 접속 가능합니다.
 
 ---
 
